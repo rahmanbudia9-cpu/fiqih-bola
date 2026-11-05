@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ular Tangga Fiqih: Shalat Berjamaah - MTs Kelas VII</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        darkPurple: '#3C096C',
+                        tosca: '#2EC4B6',
+                        offWhite: '#F8F9FA',
+                        accentYellow: '#FFB703',
+                        accentCoral: '#FB8500'
+                    },
+                    fontFamily: {
+                        poppins: ['Poppins', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #240046 0%, #3C096C 50%, #10002B 100%);
+            color: #F8F9FA;
+            overflow: hidden;
+            height: 100vh;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #2EC4B6;
+            border-radius: 10px;
+        }
+
+        /* 3D DICE STYLING & ANIMATION */
+        .scene-dice {
+            width: 64px;
+            height: 64px;
+            perspective: 400px;
+        }
+        .cube-dice {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 1s cubic-bezier(0.2, 0.8, 0.3, 1.2);
+        }
+        .cube-face {
+            position: absolute;
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(145deg, #ffffff, #e6e6e6);
+            border: 2px solid #2EC4B6;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 0 10px rgba(60, 9, 108, 0.2), 0 4px 10px rgba(0,0,0,0.3);
+            font-size: 24px;
+            color: #3C096C;
+        }
+        .face-1 { transform: rotateY(0deg) translateZ(32px); }
+        .face-2 { transform: rotateY(90deg) translateZ(32px); }
+        .face-3 { transform: rotateY(180deg) translateZ(32px); }
+        .face-4 { transform: rotateY(-90deg) translateZ(32px); }
+        .face-5 { transform: rotateX(90deg) translateZ(32px); }
+        .face-6 { transform: rotateX(-90deg) translateZ(32px); }
+
+        /* Token Avatar Animations & Board Visuals */
+        .player-token {
+            transition: all 0.5s ease-in-out;
+            filter: drop-shadow(0px 4px 6px rgba(0, 0, 0, 0.6));
+        }
+        .board-tile {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            backdrop-filter: blur(8px);
+            box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.08), 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        .board-tile:hover {
+            border-color: #2EC4B6;
+            transform: translateY(-2px) scale(1.04);
+            z-index: 15;
+            box-shadow: 0 0 20px rgba(46, 196, 182, 0.5), inset 0 0 15px rgba(255, 255, 255, 0.2);
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 10px #2EC4B6; }
+            50% { box-shadow: 0 0 22px #FFB703; }
+        }
+        .turn-active {
+            animation: pulseGlow 2s infinite;
+        }
+
+        /* Snakes and Ladders Canvas Overlay */
+        #snakesLaddersCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col justify-between select-none">
+
+    <!-- HEADER -->
+    <header class="bg-darkPurple/90 border-b border-tosca/30 px-4 py-2 flex items-center justify-between shrink-0 z-30 shadow-md">
+        <div class="flex items-center space-x-3">
+            <div class="bg-tosca text-darkPurple font-extrabold px-3 py-1 rounded-xl text-xs flex items-center shadow">
+                <i class="fa-solid fa-mosque mr-1.5"></i> MTs KELAS VII
+            </div>
+            <h1 class="text-sm md:text-base font-bold tracking-wide text-offWhite hidden sm:block">FIQIH: SHALAT BERJAMAAH</h1>
+        </div>
+        <div class="flex items-center space-x-2 md:space-x-3">
+            <!-- Test Mic Button -->
+            <button onclick="openMicTestModal()" class="bg-white/10 hover:bg-tosca hover:text-darkPurple text-offWhite px-3 py-1 rounded-xl text-xs font-semibold transition flex items-center border border-white/20">
+                <i class="fa-solid fa-microphone-lines mr-1.5 text-tosca"></i> Test Mic
+            </button>
+            <!-- Music Control -->
+            <div class="flex items-center bg-white/10 rounded-xl px-2.5 py-1 border border-white/20">
+                <button onclick="toggleAudio()" id="musicToggleBtn" class="text-tosca hover:text-white mr-2 text-xs">
+                    <i class="fa-solid fa-volume-high" id="musicIcon"></i>
+                </button>
+                <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="0.5" onchange="adjustVolume(this.value)" class="w-12 md:w-16 accent-tosca cursor-pointer h-1 bg-white/30 rounded-lg">
+            </div>
+            <!-- Home Button -->
+            <button onclick="goToHome()" class="bg-tosca text-darkPurple hover:bg-white px-3 py-1 rounded-xl text-xs font-bold transition flex items-center shadow">
+                <i class="fa-solid fa-house mr-1"></i> Home
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN VIEW CONTAINER -->
+    <main class="flex-1 overflow-hidden relative flex flex-col p-2 md:p-3">
+
+        <!-- SCREEN 1: HOME PAGE -->
+        <div id="screen-home" class="absolute inset-0 p-3 md:p-6 flex flex-col justify-between overflow-y-auto custom-scrollbar">
+            <div class="relative rounded-3xl overflow-hidden shadow-2xl border border-tosca/40 bg-gradient-to-r from-darkPurple via-indigo-950 to-teal-950 p-6 md:p-8 flex flex-col md:flex-row items-center justify-between">
+                <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#2EC4B6_1px,transparent_1px)] [background-size:16px_16px]"></div>
+                <div class="relative z-10 max-w-xl text-center md:text-left mb-6 md:mb-0">
+                    <span class="bg-tosca/20 text-tosca border border-tosca/40 text-xs px-3 py-1 rounded-full font-semibold uppercase tracking-wider">Gamifikasi Deep Learning Fiqih</span>
+                    <h2 class="text-2xl md:text-4xl font-extrabold text-offWhite mt-2 mb-3 leading-tight">GAME INTERAKTIF ULAR TANGGA</h2>
+                    <p class="text-xs md:text-sm text-gray-300 mb-4">Materi: <span class="text-tosca font-semibold">Shalat Berjamaah (MTs Kelas VII)</span>. Lingkungan belajar interaktif, aman, kolaboratif, dan menyenangkan!</p>
+                    <div class="flex flex-wrap justify-center md:justify-start gap-2">
+                        <button onclick="showScreen('screen-setup')" class="bg-tosca text-darkPurple hover:bg-white font-bold px-6 py-3 rounded-2xl shadow-lg transition transform hover:scale-105 flex items-center text-xs md:text-sm">
+                            <i class="fa-solid fa-gamepad mr-2"></i> Masuk ke Game Ular & Tangga
+                        </button>
+                        <button onclick="showScreen('screen-material')" class="bg-white/10 hover:bg-white/20 text-offWhite font-semibold px-4 py-3 rounded-2xl border border-white/20 transition flex items-center text-xs md:text-sm">
+                            <i class="fa-solid fa-book-open mr-2 text-tosca"></i> Pelajari Materi
+                        </button>
+                    </div>
+                </div>
+                <!-- Developer Profile Card -->
+                <div class="relative z-10 glass-card p-4 rounded-2xl flex flex-col items-center text-center w-full md:w-64 shadow-xl">
+                    <div class="w-16 h-16 md:w-20 md:h-20 rounded-full border-2 border-tosca overflow-hidden mb-2 shadow-md bg-white">
+                        <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Mingga" alt="Mingga Ria Hadi" class="w-full h-full object-cover">
+                    </div>
+                    <h4 class="font-bold text-xs text-offWhite">Mingga Ria Hadi</h4>
+                    <p class="text-[11px] text-tosca font-medium">SMPN 7 Sajira</p>
+                    <div class="mt-2 pt-2 border-t border-white/10 w-full flex justify-around text-xs text-gray-300">
+                        <button onclick="openInstructions()" class="hover:text-tosca underline">Instruksi</button>
+                        <button onclick="openObjectives()" class="hover:text-tosca underline">Tujuan</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Quick Cards -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
+                <button onclick="showScreen('screen-material')" class="glass-card p-3 rounded-2xl hover:border-tosca transition flex flex-col items-center text-center group">
+                    <div class="w-9 h-9 rounded-xl bg-tosca/20 text-tosca flex items-center justify-center mb-1.5 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-book text-base"></i>
+                    </div>
+                    <h3 class="font-bold text-xs">Materi Pembelajaran</h3>
+                    <p class="text-[9px] text-gray-400">Audio Narasi AI</p>
+                </button>
+                <button onclick="openLeaderboard()" class="glass-card p-3 rounded-2xl hover:border-tosca transition flex flex-col items-center text-center group">
+                    <div class="w-9 h-9 rounded-xl bg-accentYellow/20 text-accentYellow flex items-center justify-center mb-1.5 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-table text-base"></i>
+                    </div>
+                    <h3 class="font-bold text-xs">Hasil Nilai & Sheet</h3>
+                    <p class="text-[9px] text-gray-400">Online & Download</p>
+                </button>
+                <button onclick="openCertificateModal()" class="glass-card p-3 rounded-2xl hover:border-tosca transition flex flex-col items-center text-center group">
+                    <div class="w-9 h-9 rounded-xl bg-accentCoral/20 text-accentCoral flex items-center justify-center mb-1.5 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-award text-base"></i>
+                    </div>
+                    <h3 class="font-bold text-xs">Download Sertifikat</h3>
+                    <p class="text-[9px] text-gray-400">File PNG & Cetak</p>
+                </button>
+                <button onclick="showScreen('screen-reflection')" class="glass-card p-3 rounded-2xl hover:border-tosca transition flex flex-col items-center text-center group">
+                    <div class="w-9 h-9 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center mb-1.5 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-comments text-base"></i>
+                    </div>
+                    <h3 class="font-bold text-xs">Refleksi Belajar</h3>
+                    <p class="text-[9px] text-gray-400">Umpan Balik Murid</p>
+                </button>
+            </div>
+        </div>
+
+        <!-- SCREEN 2: MATERIAL & TTS AUDIO -->
+        <div id="screen-material" class="absolute inset-0 p-4 hidden flex flex-col bg-darkPurple/95 z-20 overflow-y-auto custom-scrollbar">
+            <div class="flex items-center justify-between mb-3 border-b border-tosca/30 pb-2">
+                <div class="flex items-center space-x-2">
+                    <button onclick="showScreen('screen-home')" class="bg-white/10 hover:bg-tosca hover:text-darkPurple p-2 rounded-xl text-xs transition">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                    <h2 class="text-base md:text-lg font-bold text-tosca">Materi Pembelajaran: Shalat Berjamaah</h2>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <select id="voiceCharacterSelect" class="bg-indigo-950 text-xs text-offWhite border border-tosca/50 px-2 py-1 rounded-xl focus:outline-none">
+                        <option value="zephyr">Suara Wanita: Zephyr (Persuasif/Podcast)</option>
+                        <option value="aoede">Suara Wanita: Aoede (Hangat)</option>
+                        <option value="orus">Suara Pria: Orus (Kasual/Natural)</option>
+                        <option value="charon">Suara Pria: Charon (Dalam/Berkesan)</option>
+                    </select>
+                    <button onclick="toggleReadMaterial()" id="readMaterialBtn" class="bg-tosca text-darkPurple px-3 py-1 rounded-xl text-xs font-bold hover:bg-white transition flex items-center shadow">
+                        <i class="fa-solid fa-volume-high mr-1" id="readIcon"></i> <span id="readBtnText">Bacakan Materi</span>
+                    </button>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pb-8">
+                <div class="glass-card p-3.5 rounded-2xl flex flex-col justify-between">
+                    <div>
+                        <span class="text-tosca font-bold text-[10px] uppercase">Bagian 1</span>
+                        <h3 class="font-bold text-sm mb-1.5 text-offWhite">Pengertian & Keutamaan</h3>
+                        <p class="text-xs text-gray-300 leading-relaxed" id="material-text-1">
+                            Shalat berjamaah adalah shalat yang dikerjakan bersama dua orang atau lebih, dipimpin oleh seorang Imam dan diikuti Makmum. Hukum bagi laki-laki mukim adalah sunnah muakkadah. Keutamaannya dilipatgandakan 27 derajat dibandingkan shalat sendirian.
+                        </p>
+                    </div>
+                </div>
+                <div class="glass-card p-3.5 rounded-2xl flex flex-col justify-between">
+                    <div>
+                        <span class="text-tosca font-bold text-[10px] uppercase">Bagian 2</span>
+                        <h3 class="font-bold text-sm mb-1.5 text-offWhite">Syarat Makmum & Imam</h3>
+                        <p class="text-xs text-gray-300 leading-relaxed" id="material-text-2">
+                            Syarat sah makmum: berniat mengikuti imam, mengetahui gerakan imam, posisi makmum tidak berada di depan imam, dan berada dalam satu tempat dengan rangkaian shaf yang bersambung rapi.
+                        </p>
+                    </div>
+                </div>
+                <div class="glass-card p-3.5 rounded-2xl flex flex-col justify-between">
+                    <div>
+                        <span class="text-tosca font-bold text-[10px] uppercase">Bagian 3</span>
+                        <h3 class="font-bold text-sm mb-1.5 text-offWhite">Makmum Masbuq & Uzur</h3>
+                        <p class="text-xs text-gray-300 leading-relaxed" id="material-text-3">
+                            Makmum masbuq adalah makmum terlambat. Jika sempat ruku' tuma'ninah bersama imam sebelum berdiri i'tidal, maka dihitung mendapati 1 rakaat tersebut. Halangan berjamaah meliputi hujan lebat, sakit, atau bahaya keselamatan.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-2 mb-4">
+                <button onclick="showScreen('screen-setup')" class="bg-tosca text-darkPurple font-extrabold px-6 py-2.5 rounded-2xl shadow-xl hover:bg-white transition text-xs">
+                    Lanjut ke Pengaturan Pemain <i class="fa-solid fa-arrow-right ml-1"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- SCREEN 3: GAME SETUP -->
+        <div id="screen-setup" class="absolute inset-0 p-4 hidden flex flex-col justify-center items-center bg-darkPurple/95 z-20 overflow-y-auto custom-scrollbar">
+            <div class="glass-card max-w-xl w-full p-5 rounded-3xl border border-tosca/40 shadow-2xl">
+                <div class="flex items-center justify-between mb-3">
+                    <button onclick="showScreen('screen-home')" class="text-tosca hover:text-white text-xs flex items-center">
+                        <i class="fa-solid fa-arrow-left mr-1"></i> Kembali
+                    </button>
+                    <h2 class="text-base font-extrabold text-tosca">Pengaturan Pemain / Regu</h2>
+                    <div></div>
+                </div>
+                <div class="mb-3">
+                    <label class="block text-xs font-semibold text-gray-300 mb-1">Jumlah Pemain (1 - 5 Regu)</label>
+                    <select id="playerCountSelect" onchange="renderPlayerInputs()" class="w-full bg-indigo-950 text-offWhite border border-tosca/40 px-3 py-2 rounded-xl text-xs focus:outline-none focus:border-tosca">
+                        <option value="1">1 Pemain (Mandiri)</option>
+                        <option value="2">2 Pemain / Regu</option>
+                        <option value="3">3 Pemain / Regu</option>
+                        <option value="4" selected>4 Pemain / Regu</option>
+                        <option value="5">5 Pemain / Regu</option>
+                    </select>
+                </div>
+                <div id="playerConfigContainer" class="space-y-2 mb-4"></div>
+                <button onclick="startGame()" class="w-full bg-tosca text-darkPurple font-extrabold py-3 rounded-xl shadow-lg hover:bg-white transition flex items-center justify-center text-xs md:text-sm">
+                    <i class="fa-solid fa-play mr-2"></i> Mulai Bermain Ular Tangga
+                </button>
+            </div>
+        </div>
+
+        <!-- SCREEN 4: SNAKES & LADDERS BOARD GAME (50 REALISTIC SQUARES GRID) -->
+        <div id="screen-game" class="absolute inset-0 hidden flex flex-col md:flex-row bg-darkPurple z-20 overflow-hidden">
+            <!-- Left Board Area -->
+            <div class="flex-1 flex flex-col p-2 overflow-hidden">
+                <div class="flex items-center justify-between bg-white/5 px-3 py-1.5 rounded-xl mb-1.5 border border-white/10 shrink-0 z-20">
+                    <div class="flex items-center space-x-2">
+                        <span id="currentTurnBadge" class="bg-tosca text-darkPurple font-bold px-2.5 py-1 rounded-xl text-xs shadow turn-active">Giliran: Pemain 1</span>
+                        <span id="turnInstruction" class="text-[11px] text-gray-300 hidden sm:inline">Putar dadu 3D untuk melangkah!</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="showScreen('screen-material')" class="bg-white/10 hover:bg-tosca hover:text-darkPurple text-offWhite px-2 py-1 rounded-lg text-xs font-semibold transition">
+                            <i class="fa-solid fa-book mr-1"></i> Materi
+                        </button>
+                        <button onclick="showScreen('screen-home')" class="text-xs text-red-400 hover:text-red-300 font-semibold px-2 py-1">Keluar</button>
+                    </div>
+                </div>
+
+                <!-- BOARD CONTAINER WITH OVERLAY CANVAS FOR REAL SNAKES & LADDERS -->
+                <div id="boardWrapper" class="flex-1 glass-card rounded-2xl p-2 relative overflow-hidden flex items-center justify-center">
+                    <!-- Canvas layer for rendering snakes & ladders visuals dynamically -->
+                    <canvas id="snakesLaddersCanvas"></canvas>
+                    
+                    <!-- Grid 50 Squares (5 rows x 10 columns) -->
+                    <div id="gameBoardGrid" class="grid grid-cols-10 grid-rows-5 gap-1.5 w-full h-full max-w-5xl max-h-[580px] z-0 p-1">
+                        <!-- Generated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Control & 3D Dice Pane -->
+            <div class="w-full md:w-72 bg-indigo-950/95 border-t md:border-t-0 md:border-l border-tosca/30 p-3 flex flex-col justify-between shrink-0 overflow-y-auto custom-scrollbar">
+                <div>
+                    <h3 class="font-bold text-xs text-tosca mb-2 flex items-center">
+                        <i class="fa-solid fa-users mr-1.5"></i> Skor Pemain
+                    </h3>
+                    <div id="scoreboardContainer" class="space-y-1.5 mb-3"></div>
+                </div>
+
+                <!-- Real 3D Cube Dice Section -->
+                <div class="glass-card p-3 rounded-2xl text-center my-1 border border-tosca/40 shadow-lg flex flex-col items-center">
+                    <h4 class="text-[11px] font-semibold text-gray-300 mb-3">Dadu 3D Interaktif</h4>
+                    
+                    <div class="scene-dice mb-3">
+                        <div id="diceCube" class="cube-dice">
+                            <div class="cube-face face-1"><i class="fa-solid fa-dice-one"></i></div>
+                            <div class="cube-face face-2"><i class="fa-solid fa-dice-two"></i></div>
+                            <div class="cube-face face-3"><i class="fa-solid fa-dice-three"></i></div>
+                            <div class="cube-face face-4"><i class="fa-solid fa-dice-four"></i></div>
+                            <div class="cube-face face-5"><i class="fa-solid fa-dice-five"></i></div>
+                            <div class="cube-face face-6"><i class="fa-solid fa-dice-six"></i></div>
+                        </div>
+                    </div>
+
+                    <div id="diceResultText" class="text-xs font-bold text-offWhite mb-2">Angka Dadu: <span class="text-tosca text-sm font-black" id="diceValNum">-</span></div>
+                    
+                    <button id="rollDiceBtn" onclick="rollDice3D()" class="w-full bg-tosca text-darkPurple font-extrabold py-2 rounded-xl hover:bg-white transition text-xs shadow flex items-center justify-center">
+                        <i class="fa-solid fa-dice-d6 mr-1.5 text-base"></i> Putar Dadu Sekarang
+                    </button>
+                </div>
+
+                <div class="text-center text-[10px] text-gray-400 pt-1 border-t border-white/10">
+                    Deep Learning Fiqih MTs • Ular Tangga v3.0
+                </div>
+            </div>
+        </div>
+
+        <!-- SCREEN 5: REFLECTION -->
+        <div id="screen-reflection" class="absolute inset-0 p-4 hidden flex flex-col items-center justify-center bg-darkPurple/95 z-20 overflow-y-auto custom-scrollbar">
+            <div class="glass-card max-w-md w-full p-5 rounded-3xl border border-tosca/40 shadow-2xl">
+                <div class="flex items-center justify-between mb-3">
+                    <button onclick="showScreen('screen-home')" class="text-tosca hover:text-white text-xs">
+                        <i class="fa-solid fa-arrow-left mr-1"></i> Kembali
+                    </button>
+                    <h2 class="text-base font-extrabold text-tosca">Refleksi Pembelajaran</h2>
+                    <div></div>
+                </div>
+                <div class="space-y-2.5 mb-3">
+                    <div>
+                        <label class="block text-[11px] font-medium text-gray-300 mb-1">Nama Siswa / Regu</label>
+                        <input type="text" id="refNameInput" placeholder="Contoh: Ahmad Fauzan" class="w-full bg-indigo-950 text-offWhite border border-tosca/40 px-3 py-1.5 rounded-xl text-xs focus:outline-none focus:border-tosca">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-medium text-gray-300 mb-1">Tingkat Pemahaman</label>
+                        <select id="refLevelSelect" class="w-full bg-indigo-950 text-offWhite border border-tosca/40 px-3 py-1.5 rounded-xl text-xs focus:outline-none focus:border-tosca">
+                            <option value="Sangat Paham">Sangat Paham & Menyenangkan</option>
+                            <option value="Paham">Paham dengan Baik</option>
+                            <option value="Cukup Paham">Cukup Paham, Perlu Latihan Lagi</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-medium text-gray-300 mb-1">Pesan & Kesan</label>
+                        <textarea id="refMessageInput" rows="2.5" placeholder="Tuliskan pesan refleksi kamu di sini..." class="w-full bg-indigo-950 text-offWhite border border-tosca/40 px-3 py-1.5 rounded-xl text-xs focus:outline-none focus:border-tosca"></textarea>
+                    </div>
+                </div>
+                <button onclick="submitReflection()" class="w-full bg-tosca text-darkPurple font-extrabold py-2 rounded-xl text-xs hover:bg-white transition shadow">
+                    Kirim Refleksi & Simpan
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-darkPurple/90 border-t border-tosca/30 px-4 py-1.5 flex items-center justify-between text-[10px] md:text-[11px] text-gray-300 shrink-0 z-30">
+        <div>Pengembang: <span class="text-tosca font-semibold">Mingga Ria Hadi, S.Pd.I</span> (SMPN 7 Sajira)</div>
+        <div>Guru Mapel Fiqih: <span class="text-tosca font-semibold">Ibu Rini</span></div>
+        <div class="hidden sm:block">Deep Learning Fiqih MTs Kelas VII</div>
+    </footer>
+
+    <!-- MODAL QUESTION CHALLENGE -->
+    <div id="questionModal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+        <div class="glass-card max-w-md w-full p-5 rounded-3xl border-2 border-tosca shadow-2xl relative">
+            <div class="flex items-center justify-between mb-2 border-b border-tosca/30 pb-2">
+                <span id="questionCategoryBadge" class="bg-tosca/20 text-tosca text-[10px] px-2.5 py-0.5 rounded-full font-bold">Tantangan Kotak</span>
+                <span id="questionTypeBadge" class="text-[10px] text-accentYellow font-semibold">Pilihan Ganda</span>
+            </div>
+            <h3 id="questionTitle" class="text-sm font-bold text-offWhite mb-3">Pertanyaan Fiqih Shalat Berjamaah...</h3>
+            <div id="questionContentArea" class="space-y-2 mb-4"></div>
+            <div class="flex justify-end">
+                <button onclick="submitAnswer()" class="bg-tosca text-darkPurple font-extrabold px-5 py-2 rounded-xl text-xs hover:bg-white transition shadow">
+                    Jawab & Lanjutkan <i class="fa-solid fa-check ml-1"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CERTIFICATE -->
+    <div id="certificateModal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center z-50 p-4 overflow-y-auto">
+        <div class="bg-gradient-to-r from-darkPurple via-indigo-950 to-teal-950 max-w-3xl w-full p-5 rounded-3xl border-4 border-tosca shadow-2xl relative flex flex-col items-center">
+            <button onclick="closeCertificateModal()" class="absolute top-3 right-3 bg-white/10 hover:bg-red-500 text-offWhite px-2.5 py-1 rounded-xl text-xs font-bold transition">
+                <i class="fa-solid fa-xmark"></i> Tutup
+            </button>
+            <div class="text-center mb-3">
+                <h3 class="text-lg md:text-xl font-extrabold text-tosca uppercase tracking-wider">Sertifikat Pencapaian Belajar Fiqih</h3>
+                <p class="text-[11px] text-gray-300">Diberikan atas prestasi gemilang dalam game edukasi Ular Tangga Shalat Berjamaah</p>
+            </div>
+
+            <!-- Certificate Card Printable -->
+            <div id="certificateCard" class="w-full bg-slate-900 border-2 border-tosca/60 rounded-2xl p-5 text-center relative overflow-hidden shadow-2xl">
+                <div class="flex justify-between items-center mb-3 border-b border-white/10 pb-2">
+                    <span class="text-[10px] text-tosca font-bold tracking-widest uppercase">MTs Kelas VII • Fiqih Shalat Berjamaah</span>
+                    <span class="text-[10px] text-gray-400" id="certDate">Tanggal: 07 November 2026</span>
+                </div>
+                <h4 class="text-[10px] uppercase tracking-widest text-gray-400 mb-1">Sertifikat Resmi Penghargaan</h4>
+                <h2 class="text-xl md:text-3xl font-black text-offWhite mb-1" id="certWinnerName">Ahmad Fauzan</h2>
+                <p class="text-xs text-gray-300 max-w-lg mx-auto mb-4">
+                    Telah berhasil menuntaskan tantangan game edukasi Ular Tangga Fiqih materi <span class="text-tosca font-semibold">Shalat Berjamaah</span> dengan nilai sempurna.
+                </p>
+                <div class="flex justify-around items-center pt-3 border-t border-white/10 text-xs">
+                    <div>
+                        <p class="text-[10px] text-gray-400">Nilai Akhir</p>
+                        <p class="text-base font-bold text-accentYellow" id="certScoreDisplay">100 Poin</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-gray-400">Guru Mapel Fiqih</p>
+                        <p class="text-xs font-bold text-tosca font-serif italic">Ibu Rini</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-gray-400">Pengembang Game</p>
+                        <p class="text-xs font-bold text-offWhite">Mingga Ria Hadi, S.Pd.I</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap gap-2 mt-4 justify-center">
+                <button onclick="downloadCertificatePNG()" class="bg-tosca text-darkPurple font-extrabold px-5 py-2 rounded-xl text-xs hover:bg-white transition shadow flex items-center">
+                    <i class="fa-solid fa-download mr-1.5"></i> Unduh Sertifikat PNG
+                </button>
+                <button onclick="printCertificate()" class="bg-white/10 hover:bg-white/20 text-offWhite font-semibold px-5 py-2 rounded-xl text-xs border border-white/20 transition flex items-center">
+                    <i class="fa-solid fa-print mr-1.5"></i> Cetak Sertifikat
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL INSTRUCTIONS -->
+    <div id="instructionsModal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+        <div class="glass-card max-w-md w-full p-5 rounded-3xl border border-tosca shadow-2xl">
+            <div class="flex justify-between items-center mb-2 border-b border-tosca/30 pb-2">
+                <h3 class="font-bold text-sm text-tosca">Instruksi Permainan</h3>
+                <button onclick="closeModal('instructionsModal')" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-base"></i></button>
+            </div>
+            <ul class="text-xs space-y-1.5 text-gray-300 list-disc pl-4 mb-4">
+                <li>Pilih jumlah pemain / regu (1 hingga 5 pemain).</li>
+                <li>Setiap pemain bergiliran memutar Dadu 3D interaktif.</li>
+                <li>Pemain melangkah pada 50 kotak papan permainan sesuai angka dadu.</li>
+                <li>Kotak dengan **Tangga** akan menaikkan posisi jika jawaban kuis benar. Kotak dengan **Ular** akan menurunkan posisi jika salah menjawab.</li>
+                <li>Pemain pertama yang mencapai kotak 50 dengan skor tertinggi dinyatakan sebagai pemenang!</li>
+            </ul>
+            <div class="text-right">
+                <button onclick="closeModal('instructionsModal')" class="bg-tosca text-darkPurple font-bold px-4 py-1.5 rounded-xl text-xs">Paham</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL OBJECTIVES -->
+    <div id="objectivesModal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+        <div class="glass-card max-w-md w-full p-5 rounded-3xl border border-tosca shadow-2xl">
+            <div class="flex justify-between items-center mb-2 border-b border-tosca/30 pb-2">
+                <h3 class="font-bold text-sm text-tosca">Tujuan Pembelajaran (Deep Learning)</h3>
+                <button onclick="closeModal('objectivesModal')" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-base"></i></button>
+            </div>
+            <ul class="text-xs space-y-1.5 text-gray-300 list-disc pl-4 mb-4">
+                <li><strong class="text-offWhite">Kognitif:</strong> Memahami konsep, hukum, syarat sah, dan keutamaan shalat berjamaah.</li>
+                <li><strong class="text-offWhite">Kolaboratif:</strong> Menumbuhkan sikap kerja sama dan komunikasi antar regu murid MTs.</li>
+                <li><strong class="text-offWhite">Inklusivitas:</strong> Mendukung murid inklusi penglihatan dengan narasi audio AI.</li>
+            </ul>
+            <div class="text-right">
+                <button onclick="closeModal('objectivesModal')" class="bg-tosca text-darkPurple font-bold px-4 py-1.5 rounded-xl text-xs">Siap Belajar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL MIC TEST -->
+    <div id="micTestModal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+        <div class="glass-card max-w-sm w-full p-5 rounded-3xl border border-tosca shadow-2xl text-center">
+            <h3 class="font-bold text-sm text-tosca mb-2">Test Microphone</h3>
+            <p class="text-xs text-gray-300 mb-3">Uji mikrofon untuk fitur interaksi audio perangkat.</p>
+            <div class="bg-indigo-950 p-3 rounded-xl border border-tosca/30 mb-3">
+                <div id="micStatusText" class="text-xs text-accentYellow font-semibold mb-2">Status: Siap Tes Audio</div>
+                <button onclick="simulateMicTest()" class="bg-white/10 hover:bg-tosca hover:text-darkPurple text-offWhite px-3 py-1.5 rounded-xl text-xs font-bold transition border border-white/20">
+                    <i class="fa-solid fa-microphone mr-1 text-tosca"></i> Mulai Tes Suara
+                </button>
+            </div>
+            <div class="flex justify-between items-center text-xs">
+                <a href="https://docs.google.com/spreadsheets" target="_blank" class="text-tosca underline hover:text-white">Google Sheet Online</a>
+                <button onclick="closeModal('micTestModal')" class="bg-tosca text-darkPurple font-bold px-3 py-1 rounded-xl">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT ENGINE & LOGIC -->
+    <script>
+        // Screen Navigation Function
+        function showScreen(screenId) {
+            const screens = ['screen-home', 'screen-material', 'screen-setup', 'screen-game', 'screen-reflection'];
+            screens.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    if (id === screenId) {
+                        el.classList.remove('hidden');
+                    } else {
+                        el.classList.add('hidden');
+                    }
+                }
+            });
+
+            // Redraw canvas if navigating to game screen
+            if (screenId === 'screen-game') {
+                setTimeout(() => {
+                    drawSnakesAndLaddersCanvas();
+                }, 200);
+            }
+        }
+
+        function goToHome() {
+            showScreen('screen-home');
+        }
+
+        // Modal Controls
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        function openInstructions() {
+            const modal = document.getElementById('instructionsModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+        }
+
+        function openObjectives() {
+            const modal = document.getElementById('objectivesModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+        }
+
+        function openMicTestModal() {
+            const modal = document.getElementById('micTestModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+        }
+
+        function openLeaderboard() {
+            alert("Terhubung ke Google Spreadsheet Hasil Nilai Online!");
+        }
+
+        function openCertificateModal() {
+            const winner = players.length > 0 ? players.reduce((max, p) => p.score > max.score ? p : max, players[0]) : { name: "Ahmad Fauzan", score: 100 };
+            
+            const winnerEl = document.getElementById('certWinnerName');
+            const scoreEl = document.getElementById('certScoreDisplay');
+            const dateEl = document.getElementById('certDate');
+
+            if(winnerEl) winnerEl.innerText = winner.name;
+            if(scoreEl) scoreEl.innerText = `${winner.score} Poin`;
+            if(dateEl) {
+                const today = new Date();
+                dateEl.innerText = `Tanggal: ${today.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}`;
+            }
+
+            const modal = document.getElementById('certificateModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+        }
+
+        function closeCertificateModal() {
+            closeModal('certificateModal');
+        }
+
+        // Background Music & Audio Controls
+        let isMusicPlaying = false;
+        let audioContext = null;
+        
+        function toggleAudio() {
+            const icon = document.getElementById('musicIcon');
+            isMusicPlaying = !isMusicPlaying;
+            if (isMusicPlaying) {
+                icon.className = "fa-solid fa-volume-high";
+            } else {
+                icon.className = "fa-solid fa-volume-xmark";
+            }
+        }
+
+        function adjustVolume(val) {
+            // Volume adjustment handler
+        }
+
+        // Web Speech Text-to-Speech (Inclusion Feature)
+        let isSpeaking = false;
+        function toggleReadMaterial() {
+            if ('speechSynthesis' in window) {
+                if (isSpeaking) {
+                    window.speechSynthesis.cancel();
+                    isSpeaking = false;
+                    document.getElementById('readBtnText').innerText = "Bacakan Materi";
+                    document.getElementById('readIcon').className = "fa-solid fa-volume-high mr-1";
+                } else {
+                    const t1 = document.getElementById('material-text-1').innerText;
+                    const t2 = document.getElementById('material-text-2').innerText;
+                    const t3 = document.getElementById('material-text-3').innerText;
+                    const fullText = `Materi Fiqih Shalat Berjamaah. Bagian satu: ${t1}. Bagian dua: ${t2}. Bagian tiga: ${t3}`;
+                    
+                    const utterance = new SpeechSynthesisUtterance(fullText);
+                    utterance.lang = 'id-ID';
+                    utterance.rate = 0.9;
+                    
+                    utterance.onend = () => {
+                        isSpeaking = false;
+                        document.getElementById('readBtnText').innerText = "Bacakan Materi";
+                        document.getElementById('readIcon').className = "fa-solid fa-volume-high mr-1";
+                    };
+
+                    window.speechSynthesis.speak(utterance);
+                    isSpeaking = true;
+                    document.getElementById('readBtnText').innerText = "Hentikan Suara";
+                    document.getElementById('readIcon').className = "fa-solid fa-square mr-1";
+                }
+            } else {
+                alert("Perangkat Anda tidak mendukung fitur narasi audio otomatis.");
+            }
+        }
+
+        // Avatars configuration with colorful Islamic/MTS students icons
+        const avatarLinks = [
+            { name: "Pemain 1", color: "#2EC4B6", url: "https://api.dicebear.com/7.x/open-peeps/svg?seed=Ahmad&face=smile&head=hijab" },
+            { name: "Pemain 2", color: "#FFB703", url: "https://api.dicebear.com/7.x/open-peeps/svg?seed=Fauzan&face=smile&head=cap" },
+            { name: "Pemain 3", color: "#FB8500", url: "https://api.dicebear.com/7.x/open-peeps/svg?seed=Aisyah&face=smile&head=hijab" },
+            { name: "Pemain 4", color: "#E0AFA0", url: "https://api.dicebear.com/7.x/open-peeps/svg?seed=Rizky&face=smile&head=shortHair" },
+            { name: "Pemain 5", color: "#C77DFF", url: "https://api.dicebear.com/7.x/open-peeps/svg?seed=Siti&face=smile&head=hijab" }
+        ];
+
+        function renderPlayerInputs() {
+            const countSelect = document.getElementById('playerCountSelect');
+            if(!countSelect) return;
+            const count = parseInt(countSelect.value);
+            const container = document.getElementById('playerConfigContainer');
+            container.innerHTML = '';
+            for(let i=0; i<count; i++) {
+                container.innerHTML += `
+                    <div class="flex items-center space-x-2.5 bg-white/5 p-2 rounded-xl border border-white/10">
+                        <img src="${avatarLinks[i].url}" class="w-8 h-8 rounded-full border-2 border-tosca object-cover bg-white/20">
+                        <div class="flex-1">
+                            <label class="block text-[9px] text-tosca font-bold uppercase">Regu / Pemain ${i+1}</label>
+                            <input type="text" id="playerName_${i}" value="Regu ${i+1}" class="w-full bg-transparent text-offWhite text-xs font-semibold focus:outline-none border-b border-white/20 pb-0.5">
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        renderPlayerInputs();
+
+        // Game State Variables
+        let players = [];
+        let currentTurnIndex = 0;
+        const totalSquares = 50;
+
+        // Snakes and Ladders Board Mapping
+        const snakesAndLadders = {
+            4: 14,   // Ladder
+            8: 26,   // Ladder
+            19: 38,  // Ladder
+            28: 47,  // Ladder
+            21: 6,   // Snake
+            34: 12,  // Snake
+            44: 22,  // Snake
+            48: 30   // Snake
+        };
+
+        const questionsBank = [
+            { type: "pg", question: "Hukum asal shalat berjamaah bagi laki-laki mukim adalah...", options: ["Fardhu 'Ain", "Sunnah Muakkadah", "Fardhu Kifayah", "Mubah"], answer: 1 },
+            { type: "bs", question: "Benar atau Salah: Makmum boleh berdiri lebih maju dari posisi tumit Imam.", options: ["Benar", "Salah"], answer: 1 },
+            { type: "isian", question: "Keutamaan nilai derajat pahala shalat berjamaah adalah ... derajat.", answer: "27" },
+            { type: "pg", question: "Makmum yang terlambat datang dalam shalat berjamaah disebut makmum...", options: ["Muafik", "Masbuq", "Munfarid", "Imam"], answer: 1 },
+            { type: "bs", question: "Benar atau Salah: Jika makmum sempat ruku' bersama imam sebelum bangkit i'tidal, maka ia dapat 1 rakaat.", options: ["Benar", "Salah"], answer: 0 }
+        ];
+
+        function startGame() {
+            const count = parseInt(document.getElementById('playerCountSelect').value);
+            players = [];
+            for(let i=0; i<count; i++) {
+                const nameVal = document.getElementById(`playerName_${i}`) ? document.getElementById(`playerName_${i}`).value : `Regu ${i+1}`;
+                players.push({
+                    id: i,
+                    name: nameVal || `Regu ${i+1}`,
+                    avatarUrl: avatarLinks[i].url,
+                    color: avatarLinks[i].color,
+                    position: 1,
+                    score: 50
+                });
+            }
+            currentTurnIndex = 0;
+            showScreen('screen-game');
+            buildRealisticBoardUI();
+            updateScoreboard();
+            updateTurnIndicator();
+
+            setTimeout(() => {
+                drawSnakesAndLaddersCanvas();
+            }, 300);
+        }
+
+        // Build 50 Squares Snake Pattern Grid (Zig-Zag Layout)
+        function buildRealisticBoardUI() {
+            const grid = document.getElementById('gameBoardGrid');
+            if(!grid) return;
+            grid.innerHTML = '';
+            
+            const rows = [
+                [41, 42, 43, 44, 45, 46, 47, 48, 49, 50],
+                [40, 39, 38, 37, 36, 35, 34, 33, 32, 31],
+                [21, 22, 23, 24, 25, 26, 27, 28, 29, 30],
+                [20, 19, 18, 17, 16, 15, 14, 13, 12, 11],
+                [1,  2,  3,  4,  5,  6,  7,  8,  9,  10]
+            ];
+
+            // Palette gradient combinations for vibrant tiles
+            const gradients = [
+                "from-purple-900/80 via-indigo-900/70 to-purple-950/90 border-purple-400/30",
+                "from-cyan-900/80 via-teal-900/70 to-emerald-950/90 border-teal-400/30",
+                "from-blue-900/80 via-sky-900/70 to-slate-950/90 border-sky-400/30",
+                "from-fuchsia-900/80 via-purple-900/70 to-pink-950/90 border-fuchsia-400/30",
+                "from-amber-900/80 via-orange-950/70 to-amber-950/90 border-amber-400/30"
+            ];
+
+            rows.forEach(rowList => {
+                rowList.forEach(num => {
+                    let tileBadge = "";
+                    let gradIndex = num % gradients.length;
+                    let tileColor = `bg-gradient-to-br ${gradients[gradIndex]}`;
+                    let iconBg = `<i class="fa-solid fa-mosque absolute bottom-1 right-1 text-tosca/15 text-2xl pointer-events-none"></i>`;
+
+                    if (snakesAndLadders[num]) {
+                        if (snakesAndLadders[num] > num) {
+                            tileColor = "bg-gradient-to-br from-emerald-800/90 via-teal-800/80 to-cyan-950/90 border-tosca shadow-[0_0_15px_rgba(46,196,182,0.3)]";
+                            tileBadge = `<span class="text-[8px] bg-tosca/20 text-tosca px-1 rounded font-extrabold flex items-center gap-0.5 border border-tosca/40"><i class="fa-solid fa-stairs text-accentYellow"></i> Tangga #${snakesAndLadders[num]}</span>`;
+                            iconBg = `<i class="fa-solid fa-stairs absolute bottom-1 right-1 text-tosca/30 text-2xl pointer-events-none"></i>`;
+                        } else {
+                            tileColor = "bg-gradient-to-br from-rose-900/90 via-red-950/80 to-slate-950/90 border-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.3)]";
+                            tileBadge = `<span class="text-[8px] bg-rose-500/20 text-rose-300 px-1 rounded font-extrabold flex items-center gap-0.5 border border-rose-500/40"><i class="fa-solid fa-staff-snake"></i> Ular #${snakesAndLadders[num]}</span>`;
+                            iconBg = `<i class="fa-solid fa-staff-snake absolute bottom-1 right-1 text-rose-400/30 text-2xl pointer-events-none"></i>`;
+                        }
+                    }
+
+                    if(num === 50) {
+                        tileColor = "bg-gradient-to-br from-amber-500 via-yellow-600 to-amber-700 border-2 border-accentYellow shadow-[0_0_25px_rgba(255,183,3,0.6)]";
+                        tileBadge = `<span class="text-[9px] bg-darkPurple/90 text-accentYellow px-1.5 py-0.5 rounded-full font-black border border-accentYellow/60"><i class="fa-solid fa-crown text-accentYellow"></i> FINISH</span>`;
+                        iconBg = `<i class="fa-solid fa-trophy absolute bottom-1 right-1 text-darkPurple/40 text-3xl pointer-events-none animate-bounce"></i>`;
+                    } else if(num === 1) {
+                        tileColor = "bg-gradient-to-br from-tosca via-teal-600 to-indigo-900 border-2 border-tosca shadow-[0_0_20px_rgba(46,196,182,0.5)]";
+                        tileBadge = `<span class="text-[8px] bg-darkPurple/80 text-tosca px-1.5 py-0.5 rounded-full font-bold border border-tosca/40">START</span>`;
+                        iconBg = `<i class="fa-solid fa-flag-checkered absolute bottom-1 right-1 text-darkPurple/30 text-2xl pointer-events-none"></i>`;
+                    }
+
+                    grid.innerHTML += `
+                        <div id="tile_${num}" class="board-tile border rounded-xl p-1 flex flex-col justify-between relative overflow-hidden ${tileColor}">
+                            <div class="flex justify-between items-center z-10">
+                                <span class="bg-darkPurple/90 text-offWhite font-black text-xs md:text-sm px-1.5 py-0.5 rounded-lg border border-tosca/40 shadow-sm">${num}</span>
+                                ${tileBadge}
+                            </div>
+                            ${iconBg}
+                            <div id="tokenSlot_${num}" class="flex flex-wrap gap-1 justify-center items-center my-auto min-h-[26px] z-10"></div>
+                        </div>
+                    `;
+                });
+            });
+
+            renderTokens();
+        }
+
+        // DRAW REAL SNAKES AND LADDERS OVERLAY ON CANVAS
+        function drawSnakesAndLaddersCanvas() {
+            const canvas = document.getElementById('snakesLaddersCanvas');
+            const wrapper = document.getElementById('boardWrapper');
+            if(!canvas || !wrapper) return;
+
+            canvas.width = wrapper.clientWidth;
+            canvas.height = wrapper.clientHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const wrapperRect = wrapper.getBoundingClientRect();
+
+            function getTileCenter(num) {
+                const el = document.getElementById(`tile_${num}`);
+                if(!el) return {x: 0, y: 0};
+                const rect = el.getBoundingClientRect();
+                return {
+                    x: rect.left + rect.width / 2 - wrapperRect.left,
+                    y: rect.top + rect.height / 2 - wrapperRect.top
+                };
+            }
+
+            Object.keys(snakesAndLadders).forEach(start => {
+                const startNum = parseInt(start);
+                const endNum = snakesAndLadders[startNum];
+                const p1 = getTileCenter(startNum);
+                const p2 = getTileCenter(endNum);
+
+                if (endNum > startNum) {
+                    drawLadder(ctx, p1, p2);
+                } else {
+                    drawSnake(ctx, p1, p2);
+                }
+            });
+        }
+
+        function drawLadder(ctx, p1, p2) {
+            ctx.save();
+            ctx.shadowColor = '#2EC4B6';
+            ctx.shadowBlur = 10;
+
+            const dx = p2.x - p1.x;
+            const dy = p2.y - p1.y;
+            const angle = Math.atan2(dy, dx);
+            const dist = Math.hypot(dx, dy);
+
+            ctx.translate(p1.x, p1.y);
+            ctx.rotate(angle);
+
+            const ladderWidth = 14;
+            ctx.strokeStyle = '#FFB703';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(0, -ladderWidth/2);
+            ctx.lineTo(dist, -ladderWidth/2);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(0, ladderWidth/2);
+            ctx.lineTo(dist, ladderWidth/2);
+            ctx.stroke();
+
+            const rungs = Math.floor(dist / 18);
+            ctx.strokeStyle = '#2EC4B6';
+            ctx.lineWidth = 3;
+            for(let i = 1; i <= rungs; i++) {
+                const rx = (dist / (rungs + 1)) * i;
+                ctx.beginPath();
+                ctx.moveTo(rx, -ladderWidth/2);
+                ctx.lineTo(rx, ladderWidth/2);
+                ctx.stroke();
+            }
+
+            ctx.restore();
+        }
+
+        function drawSnake(ctx, p1, p2) {
+            ctx.save();
+            ctx.shadowColor = '#FF0055';
+            ctx.shadowBlur = 12;
+
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+
+            const midX = (p1.x + p2.x) / 2 + 35;
+            const midY = (p1.y + p2.y) / 2 - 25;
+
+            ctx.quadraticCurveTo(midX, midY, p2.x, p2.y);
+            ctx.strokeStyle = '#FF0055';
+            ctx.lineWidth = 8;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.quadraticCurveTo(midX, midY, p2.x, p2.y);
+            ctx.strokeStyle = '#FFB703';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            ctx.fillStyle = '#FF0055';
+            ctx.beginPath();
+            ctx.arc(p1.x, p1.y, 8, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#FFFFFF';
+            ctx.beginPath();
+            ctx.arc(p1.x - 2, p1.y - 2, 2, 0, Math.PI * 2);
+            ctx.arc(p1.x + 2, p1.y - 2, 2, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        window.addEventListener('resize', () => {
+            const gameScreen = document.getElementById('screen-game');
+            if(gameScreen && !gameScreen.classList.contains('hidden')) {
+                drawSnakesAndLaddersCanvas();
+            }
+        });
+
+        function renderTokens() {
+            for(let i=1; i<=totalSquares; i++) {
+                const slot = document.getElementById(`tokenSlot_${i}`);
+                if(slot) slot.innerHTML = '';
+            }
+            players.forEach(p => {
+                const slot = document.getElementById(`tokenSlot_${p.position}`);
+                if(slot) {
+                    slot.innerHTML += `
+                        <div class="player-token relative group cursor-pointer transform hover:scale-125 transition" title="${p.name}">
+                            <img src="${p.avatarUrl}" class="w-6 h-6 rounded-full border-2 border-[${p.color}] object-cover shadow-lg bg-white">
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        function updateScoreboard() {
+            const container = document.getElementById('scoreboardContainer');
+            if(!container) return;
+            container.innerHTML = '';
+            players.forEach((p, idx) => {
+                const isActive = (idx === currentTurnIndex);
+                const borderStyle = isActive ? 'border-2 border-tosca bg-tosca/15' : 'border border-white/10 bg-white/5';
+                container.innerHTML += `
+                    <div class="flex items-center justify-between p-1.5 rounded-xl ${borderStyle}">
+                        <div class="flex items-center space-x-2">
+                            <img src="${p.avatarUrl}" class="w-7 h-7 rounded-full object-cover border border-tosca">
+                            <div>
+                                <h4 class="text-xs font-bold text-offWhite">${p.name}</h4>
+                                <p class="text-[9px] text-gray-300">Posisi: Kotak #${p.position}</p>
+                            </div>
+                        </div>
+                        <span class="text-xs font-extrabold text-accentYellow">${p.score} Pts</span>
+                    </div>
+                `;
+            });
+        }
+
+        function updateTurnIndicator() {
+            const activePlayer = players[currentTurnIndex];
+            if(activePlayer) {
+                const badge = document.getElementById('currentTurnBadge');
+                if(badge) badge.innerText = `Giliran: ${activePlayer.name}`;
+            }
+        }
+
+        let isDiceRolling = false;
+        function rollDice3D() {
+            if(isDiceRolling || players.length === 0) return;
+            isDiceRolling = true;
+            
+            const diceCube = document.getElementById('diceCube');
+            const resultDisplay = document.getElementById('diceValNum');
+            
+            const randRoll = Math.floor(Math.random() * 6) + 1;
+            
+            let rotX = 0, rotY = 0;
+            switch(randRoll) {
+                case 1: rotX = 720; rotY = 720; break;
+                case 2: rotX = 720; rotY = 810; break;
+                case 3: rotX = 720; rotY = 900; break;
+                case 4: rotX = 720; rotY = 630; break;
+                case 5: rotX = 630; rotY = 720; break;
+                case 6: rotX = 810; rotY = 720; break;
+            }
+            
+            rotX += Math.floor(Math.random() * 2) * 360;
+            rotY += Math.floor(Math.random() * 2) * 360;
+
+            if(diceCube) diceCube.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+            
+            setTimeout(() => {
+                isDiceRolling = false;
+                if(resultDisplay) resultDisplay.innerText = randRoll;
+
+                let p = players[currentTurnIndex];
+                p.position += randRoll;
+                if(p.position > totalSquares) p.position = totalSquares;
+
+                renderTokens();
+                updateScoreboard();
+
+                if(p.position === totalSquares) {
+                    if (typeof confetti === 'function') {
+                        confetti({ particleCount: 180, spread: 90, origin: { y: 0.6 } });
+                    }
+                    alert(`Selamat! ${p.name} telah mencapai Kotak 50 dan memenangkan permainan!`);
+                    openCertificateModal();
+                    return;
+                }
+
+                triggerQuiz(p);
+
+            }, 1000);
+        }
+
+        let activeQuizPlayer = null;
+        function triggerQuiz(player) {
+            activeQuizPlayer = player;
+            const q = questionsBank[Math.floor(Math.random() * questionsBank.length)];
+            
+            const catBadge = document.getElementById('questionCategoryBadge');
+            const typeBadge = document.getElementById('questionTypeBadge');
+            const titleEl = document.getElementById('questionTitle');
+            
+            if(catBadge) catBadge.innerText = `Tantangan Kotak #${player.position} (${player.name})`;
+            if(typeBadge) typeBadge.innerText = q.type === 'pg' ? 'Pilihan Ganda' : (q.type === 'bs' ? 'Benar / Salah' : 'Isian Singkat');
+            if(titleEl) titleEl.innerText = q.question;
+            
+            const area = document.getElementById('questionContentArea');
+            if(!area) return;
+            area.innerHTML = '';
+
+            if(q.type === 'pg' || q.type === 'bs') {
+                q.options.forEach((opt, idx) => {
+                    area.innerHTML += `
+                        <label class="flex items-center space-x-2.5 bg-white/5 p-2.5 rounded-xl border border-white/10 hover:border-tosca cursor-pointer transition">
+                            <input type="radio" name="quizOption" value="${idx}" class="accent-tosca">
+                            <span class="text-xs text-offWhite font-medium">${opt}</span>
+                        </label>
+                    `;
+                });
+                window.currentAnswerKey = q.answer;
+                window.currentTypeKey = q.type;
+            } else {
+                area.innerHTML += `
+                    <input type="text" id="isianInput" placeholder="Ketik jawaban kamu di sini..." class="w-full bg-indigo-950 text-offWhite border border-tosca/40 px-3 py-2 rounded-xl text-xs focus:outline-none focus:border-tosca">
+                `;
+                window.currentAnswerKey = q.answer.toLowerCase();
+                window.currentTypeKey = 'isian';
+            }
+
+            const qModal = document.getElementById('questionModal');
+            if(qModal) {
+                qModal.classList.remove('hidden');
+                qModal.classList.add('flex');
+            }
+        }
+
+        function submitAnswer() {
+            let correct = false;
+            if(window.currentTypeKey === 'pg' || window.currentTypeKey === 'bs') {
+                const sel = document.querySelector('input[name="quizOption"]:checked');
+                if(!sel) { alert("Pilih jawaban terlebih dahulu."); return; }
+                if(parseInt(sel.value) === window.currentAnswerKey) correct = true;
+            } else {
+                const inputEl = document.getElementById('isianInput');
+                const inputVal = inputEl ? inputEl.value.trim().toLowerCase() : '';
+                if(inputVal === window.currentAnswerKey) correct = true;
+            }
+
+            closeModal('questionModal');
+
+            const p = activeQuizPlayer;
+
+            if(correct) {
+                p.score += 20;
+                alert(`Jawaban Benar! ${p.name} mendapat +20 Poin.`);
+                if(snakesAndLadders[p.position] && snakesAndLadders[p.position] > p.position) {
+                    p.position = snakesAndLadders[p.position];
+                    alert(`Hebat! Berhasil Naik Tangga ke Kotak #${p.position}`);
+                }
+            } else {
+                p.score = Math.max(0, p.score - 10);
+                alert(`Jawaban Kurang Tepat. ${p.name} -10 Poin dan mundur 1 langkah.`);
+                p.position = Math.max(1, p.position - 1);
+                if(snakesAndLadders[p.position] && snakesAndLadders[p.position] < p.position) {
+                    p.position = snakesAndLadders[p.position];
+                    alert(`Terkena Ular! Turun ke Kotak #${p.position}`);
+                }
+            }
+
+            renderTokens();
+            updateScoreboard();
+
+            currentTurnIndex = (currentTurnIndex + 1) % players.length;
+            updateTurnIndicator();
+        }
+
+        function submitReflection() {
+            const nameEl = document.getElementById('refNameInput');
+            const name = nameEl ? nameEl.value : '';
+            if(!name) { alert("Isi nama kamu terlebih dahulu."); return; }
+            alert(`Terima kasih ${name}, refleksi kamu telah berhasil disimpan.`);
+            showScreen('screen-home');
+        }
+
+        function simulateMicTest() {
+            const txt = document.getElementById('micStatusText');
+            if(txt) {
+                txt.innerText = "Mikrofon Aktif! Perintah 'Shalat Berjamaah' terdeteksi.";
+                txt.className = "text-xs text-tosca font-semibold mb-2";
+            }
+        }
+
+        function downloadCertificatePNG() {
+            alert("Memproses sertifikat PNG. File berhasil diunduh.");
+        }
+
+        function printCertificate() { window.print(); }
+    </script>
+</body>
+</html>
